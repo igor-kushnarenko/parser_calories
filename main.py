@@ -1,6 +1,8 @@
 import csv
 import json
 import os
+import random
+import time
 
 from bs4 import BeautifulSoup
 import requests
@@ -52,6 +54,10 @@ with open('static/data.json') as file:
     all_categories = json.load(file)
 
 count = 0
+countdown = len(all_categories) - 1
+countdown_str = str(countdown)
+print(f'Всего итераций: {countdown}')
+
 for category_title, category_href in all_categories.items():
     rep = [",", " ", "-", "'"]
     for item in rep:
@@ -68,6 +74,10 @@ for category_title, category_href in all_categories.items():
         src = file.read()
 
     soup = BeautifulSoup(src, 'lxml')
+
+    alert_block = soup.find(class_='uk-alert-danger')
+    if alert_block is not None:
+        continue
 
     # Создаем заголовки страницы
     table_head = soup.find(class_='mzr-tc-group-table').find('tr').find_all('th')
@@ -105,8 +115,13 @@ for category_title, category_href in all_categories.items():
                  fats,
                  carbohydrates)
             )
+    time.sleep(random.randrange(1, 2))
+    print(f'Осталось итераций: {countdown}/{countdown_str}')
+    countdown -= 1
+    if countdown == 0:
+        print('Работа завершена!')
 
-# TODO добавить в исключения пустые страницы
-# TODO добавить вывод процесса на экран
-# TODO добавить небольшую задержку в выполнение итераций
+# добавить в исключения пустые страницы
+# добавить вывод процесса на экран
+# добавить небольшую задержку в выполнение итераций
 # TODO записать данные в json
