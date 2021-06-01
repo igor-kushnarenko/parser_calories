@@ -80,6 +80,8 @@ def collect_data(soup):
     :return:
     """
     products_data = soup.find(class_='mzr-tc-group-table').find('tbody').find_all('tr')
+    product_info = []
+
     for item in products_data:
         product_tds = item.find_all('td')
         product = product_tds[0].find('a').text
@@ -87,6 +89,16 @@ def collect_data(soup):
         proteins = product_tds[2].text
         fats = product_tds[3].text
         carbohydrates = product_tds[4].text
+
+        product_info.append(
+            {
+                'Product': product,
+                'Calories': calories,
+                'Proteins': proteins,
+                'Fats': fats,
+                "Carbohydrates": carbohydrates
+            }
+        )
 
         with open(f'static/{count}_{category_title}.csv', 'a', encoding='utf-8') as file:
             writer = csv.writer(file)
@@ -97,6 +109,8 @@ def collect_data(soup):
                  fats,
                  carbohydrates)
             )
+    with open(f'static/{count}_{category_title}.json', 'a', encoding='utf-8') as file:
+        json.dump(product_info, file, indent=4, ensure_ascii=False)
 
 
 def main():
@@ -122,6 +136,7 @@ def main():
             src = file.read()
 
         soup = BeautifulSoup(src, 'lxml')
+
         alert_block = soup.find(class_='uk-alert-danger')
         if alert_block is not None:
             continue
