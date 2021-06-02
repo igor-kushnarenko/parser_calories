@@ -7,25 +7,22 @@ import time
 from bs4 import BeautifulSoup
 import requests
 
-
 URL = 'http://health-diet.ru/table_calorie/'
 HEADERS = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:88.0) Gecko/20100101 Firefox/88.0'}
 
 
 def save_main_html(url: str, headers: dict):
     """
-    Функция создает копию страницы с которой необходимо работать.
+    Функция создает копию стартовой страницы с которой необходимо работать.
     :param url: str целевой адрес
     :param headers: dict фейковый юзер-агент
     """
     r = requests.get(url, headers)
     src = r.text
 
-    if not os.path.exists('static'):
-        os.mkdir('static')
-
-    with open ('static/main_page.html', 'w', encoding='utf-8') as file:
+    with open('static/main_page.html', 'w', encoding='utf-8') as file:
         file.write(src)
+    return 'static/main_page.html'
 
 
 def save_data_json(html_file):
@@ -109,12 +106,20 @@ def collect_data(soup):
                  fats,
                  carbohydrates)
             )
+    # Запись конечных данных в json
     with open(f'static/{count}_{category_title}.json', 'a', encoding='utf-8') as file:
         json.dump(product_info, file, indent=4, ensure_ascii=False)
 
 
 def main():
     global count, category_title
+
+    # Проверка существования сохраненной стартовой страницы
+    if not os.path.exists('static/main_page.html'):
+        html_file = save_main_html(URL, HEADERS)
+        if not os.path.exists('static/data.json'):
+            save_data_json(html_file)
+
     with open('static/data.json', encoding='utf-8') as file:
         all_categories = json.load(file)
     count = 0
@@ -153,8 +158,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# добавить в исключения пустые страницы
-# добавить вывод процесса на экран
-# добавить небольшую задержку в выполнение итераций
-# TODO записать данные в json
