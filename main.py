@@ -20,6 +20,8 @@ def save_main_html(url: str, headers: dict):
     r = requests.get(url, headers)
     src = r.text
 
+    if not os.path.exists('static/'):
+        os.mkdir('static/')
     with open('static/main_page.html', 'w', encoding='utf-8') as file:
         file.write(src)
     return 'static/main_page.html'
